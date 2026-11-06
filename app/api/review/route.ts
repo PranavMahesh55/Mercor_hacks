@@ -4,6 +4,7 @@ import {
   CHECKER_VERSION,
   MAX_VIDEO_BYTES,
   requirementsFromBrief,
+  normalizeReviewText,
 } from "@/lib/review";
 
 import {
@@ -54,8 +55,8 @@ export async function POST(request: Request) {
       );
     const form = await request.formData();
     const file = form.get("video");
-    const brief = String(form.get("brief") ?? "").trim();
-    const script = String(form.get("script") ?? "").trim();
+    const brief = normalizeReviewText(String(form.get("brief") ?? ""));
+    const script = normalizeReviewText(String(form.get("script") ?? ""));
     const model = String(form.get("model") ?? "");
     const duration = Number(form.get("duration"));
     const mode = String(form.get("mode") ?? "meaning");

@@ -42,6 +42,7 @@ import {
   MAX_VIDEO_BYTES,
   CHECKER_VERSION,
   requirementsFromBrief,
+  normalizeReviewText,
   correctionBrief,
   formatTime,
   type Finding,
@@ -213,8 +214,8 @@ export default function Home() {
   const current = review?.findings.find((f) => f.id === selected) ?? null;
   const changed =
     !!review &&
-    (brief !== review.brief ||
-      script !== review.script ||
+    (normalizeReviewText(brief) !== normalizeReviewText(review.brief) ||
+      normalizeReviewText(script) !== normalizeReviewText(review.script) ||
       mode !== review.scriptMode ||
       refsChanged ||
       (connected && model !== review.model));

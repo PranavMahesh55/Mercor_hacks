@@ -48,7 +48,7 @@ npm test
 npm run build
 ```
 
-34 automated tests passed at implementation time. Live Gemini 3.5 Flash Lite review of the 12-second talking-head stress clip succeeded: 20.050s server analysis, 26.423s end to end, 5,396 reported tokens. The model returned a positive delivery assessment that conflicted with local playback signals. A new deterministic cross-check marks overlapping transcript spans uncertain and downgrades conflicting positive delivery/continuity checks to cannot verify. This is a measured single run, not a general latency or accuracy benchmark.
+35 automated tests passed at implementation time. Live Gemini 3.5 Flash Lite review of the 12-second talking-head stress clip succeeded: 20.050s server analysis, 26.423s end to end, 5,396 reported tokens. The model returned a positive delivery assessment that conflicted with local playback signals. A new deterministic cross-check marks overlapping transcript spans uncertain and downgrades conflicting positive delivery/continuity checks to cannot verify. This is a measured single run, not a general latency or accuracy benchmark.
 
 ## Limits
 
@@ -80,3 +80,5 @@ The requested custom Mercor clip has not yet been generated in this session. The
 Platform: React/Vinext, Vercel AI SDK, Gemini provider, Cloudflare Workers through private Sites hosting. Face/OCR assets are self-hosted and prepared from locked npm packages before dev/build.
 
 References: [Gemini video understanding](https://ai.google.dev/gemini-api/docs/video-understanding), [MediaPipe face detector](https://developers.google.com/edge/mediapipe/solutions/vision/face_detector), [Tesseract.js](https://github.com/naptha/tesseract.js). See `docs/` for the product brief and demo runbook.
+
+A second live Gemini test used the untouched source with a diagnostic requirement prohibiting product-only cutaways. Gemini produced one requirement-linked visual finding around the cut near 6s and reproduced the cue on a blind reread. Measured server time: 10.772s; end-to-end: 21.159s; reported tokens: 11,480. This tests the visual finding path; the diagnostic brief was not the original generation brief and is not the Mercor demo.

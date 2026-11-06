@@ -163,3 +163,15 @@ test("cache identity changes when video, brief, model, mode, or reference conten
   ]);
   for (const key of changed) assert.notEqual(key, base);
 });
+
+test("multipart line-ending normalization does not falsely mark the same brief as changed", async () => {
+  const { normalizeReviewText } = await import("../lib/review.ts");
+  assert.equal(
+    normalizeReviewText("First requirement\nSecond requirement"),
+    normalizeReviewText("First requirement\r\nSecond requirement"),
+  );
+  assert.notEqual(
+    normalizeReviewText("First requirement"),
+    normalizeReviewText("Different requirement"),
+  );
+});

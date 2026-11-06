@@ -81,6 +81,10 @@ export type Review = {
   mediaScan?: import("./media-signals").MediaScan;
 };
 
+export function normalizeReviewText(text: string) {
+  return text.replace(/\r\n?/g, "\n").trim();
+}
+
 export function requirementsFromBrief(brief: string): Requirement[] {
   return brief
     .split("\n")
