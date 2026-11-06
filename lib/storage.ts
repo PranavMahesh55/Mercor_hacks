@@ -101,7 +101,7 @@ export async function cacheIdentity(
         model,
         rh,
         mode,
-        version: "takecheck-2.1",
+        version: "takecheck-2.2",
       }),
     ).buffer,
   );

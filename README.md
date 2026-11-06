@@ -11,7 +11,7 @@ npm install
 npm run dev -- --port 3000
 ```
 
-Upload an H.264/AAC MP4 under 14 MB and 60 seconds. WebM/MOV depend on browser codecs. **Check picture & audio** works locally without an API key. Connect Gemini for spoken-content and campaign-brief review. The connection tests an actual generation request, so a model catalog listing alone cannot masquerade as usable quota.
+Upload an H.264/AAC MP4 under 14 MB and 60 seconds. WebM/MOV depend on browser codecs. **Check picture & audio** works locally without an API key. Connect Gemini for spoken-content and campaign-brief review. The connection tests an actual generation request against up to four catalog-listed models, prefers a working current model, allows a sufficient response budget and distinguishes zero/daily quota, permissions, unavailable models and network failures. A catalog listing alone cannot masquerade as usable generation access.
 
 Keys stay in React memory for the current tab. They are sent in the review request to the application server and used only for Google requests; application code does not store or log them. Refreshing clears the key. Projects and media persist in this browser's IndexedDB, not a cloud media database.
 
@@ -22,7 +22,8 @@ Keys stay in React memory for the current tab. They are sent in the review reque
 3. **Brief judgment.** A fresh model context compares the source evidence with the campaign brief and optional approved script. Every candidate must cite source observation IDs and literal source evidence. Ordinary gestures and intentional product cutaways are not automatically errors. Subjective creative notes have low severity and are limited to two.
 4. **Blind video reread.** Candidate windows are read again at 4 fps without the brief or verdict. Text/speech quotes must be reproduced; structured visual event types must recur at overlapping times. Unsupported claims are withheld. The same model performs both reads, so this is consistency evidence rather than independent proof.
 5. **Independent text check, when relevant.** Browser Tesseract checks actual frames for visible brand/caption quotes. This is secondary to the talking-head review. OCR uncertainty remains visible.
-6. **Human decision.** Click timeline flags, play the source, inspect actual evidence frames, confirm or dismiss, then export only confirmed changes. Exported JSON includes source observations, rejected candidates, stage timings, and local media measurements.
+6. **Cross-check model claims.** If a transcript span overlaps a measured near-silent interval, mark it uncertain without changing its quoted words. If a positive delivery/continuity assessment conflicts with a measured playback note, downgrade it to cannot verify. Unrelated supported requirements remain intact.
+7. **Human decision.** Click timeline flags, play the source, inspect actual evidence frames, confirm or dismiss, then export only confirmed changes. Exported JSON includes source observations, rejected candidates, stage timings, and local media measurements.
 
 The text evidence record is an audit trail extracted from video, not training data or a substitute for video input. We do not train or fine-tune a model. Confirm/dismiss decisions are saved locally; they do not silently update model weights.
 
@@ -47,7 +48,7 @@ npm test
 npm run build
 ```
 
-27 automated tests passed at implementation time. API-backed video review still requires a working Gemini key and generation quota. Quota was blocked in the connected account during this session; successful real-video Gemini analysis has not been claimed.
+34 automated tests passed at implementation time. Live Gemini 3.5 Flash Lite review of the 12-second talking-head stress clip succeeded: 20.050s server analysis, 26.423s end to end, 5,396 reported tokens. The model returned a positive delivery assessment that conflicted with local playback signals. A new deterministic cross-check marks overlapping transcript spans uncertain and downgrades conflicting positive delivery/continuity checks to cannot verify. This is a measured single run, not a general latency or accuracy benchmark.
 
 ## Limits
 

@@ -24,7 +24,7 @@ export function usableModels(catalog: CatalogModel[]): GeminiModel[] {
       (m) =>
         m.supportedGenerationMethods?.includes("generateContent") &&
         /^models\/gemini-/.test(m.name) &&
-        !/image|tts|robotics|embedding|live|computer-use|research|agent|audio|custom|tuned/i.test(
+        !/image|tts|robotics|embedding|live|computer-use|research|agent|audio|custom|tuned|transcribe|nano-banana/i.test(
           m.name,
         ),
     )

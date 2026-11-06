@@ -2031,3 +2031,5 @@ select:focus {
   }
 }
 .verification-note{display:flex;align-items:flex-start;gap:8px;border:1px solid #ded7e8;background:#f7f3fc;padding:12px;border-radius:7px;margin-top:12px;color:#806b92}.verification-note.unconfirmed{background:#fff5e9;border-color:#ecd4b6;color:#9c7a4e}.verification-note strong{font-size:10px;font-weight:500}.verification-note p{font-size:9px;margin-top:5px;line-height:1.7}.verification-note details{font-size:9px;margin-top:8px}.verification-note pre{white-space:pre-wrap;font-size:9px}
+
+.transcript-warning { display: block; margin-top: 6px; color: #9a5a19; font-size: 12px; line-height: 1.5; }

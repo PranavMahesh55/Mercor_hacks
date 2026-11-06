@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CHECKER_VERSION = "takecheck-2.1";
+export const CHECKER_VERSION = "takecheck-2.2";
 export const MAX_VIDEO_BYTES = 14 * 1024 * 1024;
 export const categorySchema = z.enum([
   "message",
@@ -63,7 +63,10 @@ export type Review = {
   script: string;
   requirements: Requirement[];
   findings: Finding[];
-  transcript: ReviewPass["transcript"];
+  transcript: (ReviewPass["transcript"][number] & {
+    clear?: boolean;
+    note?: string;
+  })[];
   checks: ReviewPass["checks"];
   limitations: string[];
   analysisMs: number;

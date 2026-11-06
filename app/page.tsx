@@ -55,6 +55,7 @@ import {
   type SavedProject,
 } from "@/lib/storage";
 
+import { crossCheckPlayback } from "@/lib/playback-grounding";
 import { mediaFindings } from "@/lib/media-signals";
 
 type Tab = "findings" | "transcript" | "brief";
@@ -452,7 +453,7 @@ export default function Home() {
   function openProject(p: SavedProject) {
     if (busy) return;
     setProject(p);
-    setReview(p.review);
+    setReview(p.review ? crossCheckPlayback(p.review) : null);
     setBrief(p.brief);
     setScript(p.script);
     setRefs(p.references ?? []);
@@ -588,7 +589,7 @@ export default function Home() {
         mode,
       );
       if (!force && project.review?.cacheKey === identity) {
-        setReview(project.review);
+        setReview(crossCheckPlayback(project.review));
         setReplay(true);
         setTab("findings");
         setSelected(project.review.findings[0]?.id ?? null);
@@ -637,7 +638,7 @@ export default function Home() {
       const payload = (await r.json()) as Review & { error?: string };
       if (!r.ok) throw new Error(payload.error || "Review failed.");
       setPhase("Extracting evidence frames");
-      const result: Review = {
+      let result: Review = {
         ...payload,
         cacheKey: identity,
         findings: [...(local?.findings ?? []), ...payload.findings],
@@ -678,6 +679,7 @@ export default function Home() {
           "Independent OCR was unavailable in this browser. Model-only visual findings require manual verification.",
         );
       }
+      result = crossCheckPlayback(result);
       result.endToEndMs = Math.round(performance.now() - clientStarted);
       if (controller.signal.aborted)
         throw new DOMException("Cancelled", "AbortError");
@@ -1571,7 +1573,14 @@ export default function Home() {
                       onClick={() => seek(s.start)}
                     >
                       <span>{formatTime(s.start)}</span>
-                      <p>{s.text}</p>
+                      <p>
+                        {s.text}
+                        {s.clear === false && (
+                          <small className="transcript-warning">
+                            Audio uncertain — {s.note}
+                          </small>
+                        )}
+                      </p>
                     </button>
                   ))
                 ) : (
