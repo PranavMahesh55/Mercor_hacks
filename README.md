@@ -1,84 +1,98 @@
 # Takecheck
 
-A second look before an AI UGC ad goes live. Upload the actual video, add the same campaign brief used to generate it, inspect timestamped evidence, and confirm changes for the next take.
+### Make more. Second-guess less.
 
-## Run
+**A second opinion for AI-generated UGC—before it goes live.**
 
-Requires Node 22.13+.
+Takecheck reviews the actual video against the campaign brief, highlights moments worth checking, and helps creative teams turn feedback into a clear brief for the next take.
 
-```sh
-npm install
-npm run dev -- --port 3000
-```
+**[Open the live demo →](https://takecheck-nine.vercel.app/)** · [Product specification](docs/product-spec.md) · [Demo guide](docs/demo-runbook.md)
 
-Upload an H.264/AAC MP4 under 14 MB and 60 seconds. WebM/MOV depend on browser codecs. **Check picture & audio** works locally without an API key. Connect Gemini for spoken-content and campaign-brief review. The connection tests an actual generation request against up to four catalog-listed models, prefers a working current model, allows a sufficient response budget and distinguishes zero/daily quota, permissions, unavailable models and network failures. A catalog listing alone cannot masquerade as usable generation access.
+![Takecheck campaign workspace](docs/assets/takecheck-workspace.png)
 
-Keys stay in React memory for the current tab. They are sent in the review request to the application server and used only for Google requests; application code does not store or log them. Refreshing clears the key. Projects and media persist in this browser's IndexedDB, not a cloud media database.
+## From creative brief to a better next take
+
+1. **Set the brief.** Use the same instructions you gave your video generator. Add an approved script or reference images when relevant.
+2. **Upload the take.** Review starts automatically. Connect Gemini for spoken-content and campaign-brief analysis; local picture and audio checks also work without a key.
+3. **Inspect the evidence.** Click a timeline flag to jump to the source moment, see the relevant frame, and compare what was expected with what was observed.
+4. **Choose the changes.** Confirm or dismiss findings, then export a correction brief containing only approved changes.
+
+Supports videos up to **60 seconds and 64 MB**. H.264/AAC MP4 is recommended; WebM and MOV support depends on browser codecs.
 
 ## How the review works
 
-1. **Local video/audio checks.** A self-hosted MediaPipe face detector runs on decoded video at 4 samples/second. Frame differences in a fixed presenter crop are compared with decoded PCM audio energy. Conservative rules flag sustained still presenter pictures while audio continues, and near-digital silence surrounded by audible sections. These are playback notes requiring editorial confirmation, not brief violations or AI-authenticity verdicts.
-2. **Blind video observation.** Gemini receives the actual video, including audio, without the expected brief. It records timestamped speech, visible text, and concrete visual events such as a shot change, mouth occlusion, hand gesture, or face leaving frame. Initial sampling is 2 fps.
-3. **Brief judgment.** A fresh model context compares the source evidence with the campaign brief and optional approved script. Every candidate must cite source observation IDs and literal source evidence. Ordinary gestures and intentional product cutaways are not automatically errors. Subjective creative notes have low severity and are limited to two.
-4. **Blind video reread.** Candidate windows are read again at 4 fps without the brief or verdict. Text/speech quotes must be reproduced; structured visual event types must recur at overlapping times. Unsupported claims are withheld. The same model performs both reads, so this is consistency evidence rather than independent proof.
-5. **Independent text check, when relevant.** Browser Tesseract checks actual frames for visible brand/caption quotes. This is secondary to the talking-head review. OCR uncertainty remains visible.
-6. **Cross-check model claims.** If a transcript span overlaps a measured near-silent interval, mark it uncertain without changing its quoted words. If a positive delivery/continuity assessment conflicts with a measured playback note, downgrade it to cannot verify. Unrelated supported requirements remain intact.
-7. **Human decision.** Click timeline flags, play the source, inspect actual evidence frames, confirm or dismiss, then export only confirmed changes. Exported JSON includes source observations, rejected candidates, stage timings, and local media measurements.
+Takecheck combines multimodal judgment with separate media measurements and an explicit way to say **cannot verify**.
 
-The text evidence record is an audit trail extracted from video, not training data or a substitute for video input. We do not train or fine-tune a model. Confirm/dismiss decisions are saved locally; they do not silently update model weights.
+| Stage | What happens |
+| --- | --- |
+| **Measure picture and audio** | Local face detection, frame comparisons, and audio-energy measurements identify candidate presenter freezes and near-silent gaps. |
+| **Observe before judging** | Gemini watches and listens to the video without the campaign brief, recording timestamped source observations. |
+| **Compare with the brief** | A fresh model context evaluates those observations against the approved requirements. Candidates must reference valid evidence IDs and timestamps. |
+| **Recheck flagged moments** | Candidate windows receive a fresh video read. Unsupported observations are withheld. |
+| **Cross-check the reviewer** | Positive delivery claims that conflict with measured playback signals are downgraded. Transcript spans overlapping near silence are marked uncertain. Relevant visible-text quotes can receive a separate OCR check. |
+| **Keep a human in control** | Reviewers inspect the source and decide which changes belong in the next-take brief. |
 
-## What was actually tested
+The same Gemini model performs the initial read and reread, so repeated observations are consistency evidence rather than independent proof. Takecheck combines pretrained models and application-level verification; it does not train a new model.
 
-The developer diagnostics include an actual talking-head UGC sample from [HeyGen's public avatar showcase](https://www.heygen.com/avatars). A 12-second crop is the clean control. A separate stress copy adds a known picture freeze at 5–8s and an audio mute at 9–11.5s. These deliberately edited controls are **not** the primary Mercor campaign and do not demonstrate natural generator failure rates.
+## Built with
 
-Actual browser scan on this machine:
+| Layer | Technology |
+| --- | --- |
+| Application | Next.js, React, TypeScript, Tailwind CSS |
+| Multimodal review | Google Gemini through the Vercel AI SDK |
+| Picture and audio checks | MediaPipe, Web Audio API, HTML video, Canvas |
+| Visible-text verification | Tesseract.js |
+| Local projects and replays | IndexedDB |
+| Production hosting | Vercel |
+| Larger video uploads | Chunked upload through the Gemini Files API |
 
-| Clip | Playback findings | End-to-end time |
-| --- | --- | --- |
-| Untouched talking head | 0 | 2.074s |
-| Controlled stress copy | Freeze 5.25–7.75s; near silence 9.25–11.5s | 2.133s |
+Gemini **3.5 Flash Lite** was used for the verified live video tests. The connection flow discovers available models and tests generation access before selecting a working model.
 
-The model/runtime was already loaded. These are two short local diagnostic runs, not representative latency, precision, recall, or a Gemini benchmark. A blind internal vision reviewer separately noticed the repeated presenter frames around 5–8s; a different reviewer reported no clear visual defect in the clean contact sheet. Both inspected 2 fps stills and did not hear audio. An offline Whisper tiny.en diagnostic transcribed the actual source speech; this is not wired into the hosted product.
+## Run locally
 
-Recorded browser measurements are bound to the exact source files by SHA-256 in the test fixtures. Tests also cover missing audio, no detected face, short still moments, invented evidence, time errors, reread disagreement, unavailable checks, cache identity, and correction export. Text-card tests remain isolated regression tests.
+Requires **Node.js 22.13+**.
 
-```sh
-npm run typecheck
-npm test
-npm run build
+```bash
+npm ci
+node scripts/prepare-ocr.mjs
+npm run dev:next
 ```
 
-35 automated tests passed at implementation time. Live Gemini 3.5 Flash Lite review of the 12-second talking-head stress clip succeeded: 20.050s server analysis, 26.423s end to end, 5,396 reported tokens. The model returned a positive delivery assessment that conflicted with local playback signals. A new deterministic cross-check marks overlapping transcript spans uncertain and downgrades conflicting positive delivery/continuity checks to cannot verify. This is a measured single run, not a general latency or accuracy benchmark.
+Open [localhost:3002](http://localhost:3002). Connect your Gemini API key in **AI settings**, add your campaign brief, and upload a video.
 
-## Limits
+```bash
+# TypeScript and automated checks
+npm run typecheck
+npm test
 
-- A visible face is not identity or proof of a real person. No attractiveness, emotion, anatomy, deepfake, or measured lip-sync score is produced.
-- Audio energy is not speech detection. Intentional pauses/still shots can resemble playback defects. Short or subtle artifacts may be missed.
-- Model speech, visual understanding, judgment, and approximate timestamps can be wrong. Passing one requirement does not establish the whole ad is ready.
-- No virality, reach, conversion, legal-compliance, or universal quality verdict.
-- Generic appearance opinions are withheld. Visual cue notes still need human playback review.
-- The local scan survives absent Gemini access. If Gemini fails after that scan, playback results remain available, with campaign coverage explicitly incomplete.
+# Production build
+npm run build:vercel
+npx next start --port 3000
+```
 
-## Primary Mercor demo
+The repository also retains a Vinext/Cloudflare build for the original Sites deployment through `npm run dev` and `npm run build`.
 
-The Mercor campaign starter contains a normal CMO-style brief shared by generation and review. Generate a 40–50s vertical female-stock-avatar clip in HeyGen free, without planted mistakes or fabricated employee/testimonial claims. Use the same brief to review it. A clean result is valid. Time the real generation separately; a saved video/review can be used with its replay label for presentation reliability.
+## Verified results
 
-The requested custom Mercor clip has not yet been generated in this session. The public talking-head control is separate test material.
+**37 automated tests passed**, covering evidence grounding, invalid timestamps, reread disagreement, uncertainty handling, cache identity, confirmed-only exports, and upload-destination validation.
 
-## Source map
+| Diagnostic | Observed result |
+| --- | --- |
+| Untouched talking-head clip | No local playback flags; approximately **2.1s** end to end with the runtime loaded. |
+| Controlled freeze and mute | Local checks identified both injected faults. |
+| Live Gemini review | A 12-second clip completed in **26.4s** end to end. A conflicting positive model assessment prompted the playback cross-check. |
+| Visual requirement test | Gemini flagged a product-only cutaway against an explicit presenter-visibility requirement and reproduced the cue on reread; **21.2s** end to end. |
 
-- `app/page.tsx`: campaign workspace, video player, local scan, human decisions, persistence, exports
-- `app/api/review/route.ts`: Gemini video observation/judgment/reread driver
-- `lib/analysis.ts`: evidence provenance, grounding, verification and abstention
-- `lib/media-scan.ts`: decoded video/audio and local face inference
-- `lib/media-signals.ts`: conservative temporal rules and playback notes
-- `lib/ocr.ts`: secondary independent visible-text verification
-- `lib/review.ts`: schemas, coverage reconciliation, correction export
-- `lib/storage.ts`: IndexedDB and content-based cache identity
-- `lib/demo.ts`: normal Mercor generation/review brief
+These are short diagnostic runs, not a general accuracy or latency benchmark. Sample footage comes from [HeyGen’s public avatar showcase](https://www.heygen.com/avatars); controlled edits and diagnostic briefs are documented in [the media notes](public/demo/README.md).
 
-Platform: React/Vinext, Vercel AI SDK, Gemini provider, Cloudflare Workers through private Sites hosting. Face/OCR assets are self-hosted and prepared from locked npm packages before dev/build.
+## Data and review boundaries
 
-References: [Gemini video understanding](https://ai.google.dev/gemini-api/docs/video-understanding), [MediaPipe face detector](https://developers.google.com/edge/mediapipe/solutions/vision/face_detector), [Tesseract.js](https://github.com/naptha/tesseract.js). See `docs/` for the product brief and demo runbook.
+- Projects, source videos, saved reviews, and reviewer decisions are stored locally in the browser. There is no cross-device project sync.
+- API keys stay in the current tab’s memory. Application code does not persist or log them; refreshing requires reconnecting.
+- Running AI review sends media and the brief to Google. Larger videos use Google’s Files API for processing.
+- Findings and timestamps can be wrong. Intentional pauses, still shots, and creative choices need human interpretation.
+- Takecheck does not establish whether a person is real, measure lip synchronization, or predict virality, conversions, or legal compliance.
 
-A second live Gemini test used the untouched source with a diagnostic requirement prohibiting product-only cutaways. Gemini produced one requirement-linked visual finding around the cut near 6s and reproduced the cue on a blind reread. Measured server time: 10.772s; end-to-end: 21.159s; reported tokens: 11,480. This tests the visual finding path; the diagnostic brief was not the original generation brief and is not the Mercor demo.
+---
+
+Built for **Mercor Hack Day at Georgia Tech**: evaluating specialized AI output through source evidence, separate checks, and human expertise.
