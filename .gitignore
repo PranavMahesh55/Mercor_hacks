@@ -43,3 +43,9 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+# Generated OCR runtime, copied from locked npm packages before dev/build
+/public/ocr/core/
+/public/ocr/worker.min.js
+
+/public/vision/wasm/

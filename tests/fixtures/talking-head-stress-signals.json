@@ -1,0 +1,314 @@
+{
+  "samples": [
+    {
+      "time": 0,
+      "face": true,
+      "motion": null,
+      "db": -26.42852486732285
+    },
+    {
+      "time": 0.25,
+      "face": true,
+      "motion": 0.03435106464460784,
+      "db": -24.617590696204722
+    },
+    {
+      "time": 0.5,
+      "face": true,
+      "motion": 0.06680676828022876,
+      "db": -22.854938398219407
+    },
+    {
+      "time": 0.75,
+      "face": true,
+      "motion": 0.0523297079248366,
+      "db": -17.900319743265303
+    },
+    {
+      "time": 1,
+      "face": true,
+      "motion": 0.05509631587009804,
+      "db": -18.652553808668884
+    },
+    {
+      "time": 1.25,
+      "face": true,
+      "motion": 0.032591975592320264,
+      "db": -17.3673395584566
+    },
+    {
+      "time": 1.5,
+      "face": true,
+      "motion": 0.041115515216503265,
+      "db": -19.546252228428905
+    },
+    {
+      "time": 1.75,
+      "face": true,
+      "motion": 0.07142405790441177,
+      "db": -24.082896235627622
+    },
+    {
+      "time": 2,
+      "face": true,
+      "motion": 0.0950539981617647,
+      "db": -17.62277182652738
+    },
+    {
+      "time": 2.25,
+      "face": true,
+      "motion": 0.07548221762663399,
+      "db": -18.495102651686008
+    },
+    {
+      "time": 2.5,
+      "face": true,
+      "motion": 0.0772531147875817,
+      "db": -17.64656405897731
+    },
+    {
+      "time": 2.75,
+      "face": true,
+      "motion": 0.07421013327205882,
+      "db": -16.563348425011366
+    },
+    {
+      "time": 3,
+      "face": true,
+      "motion": 0.03895718443627451,
+      "db": -20.157604316213735
+    },
+    {
+      "time": 3.25,
+      "face": true,
+      "motion": 0.03070363562091503,
+      "db": -21.95249252203261
+    },
+    {
+      "time": 3.5,
+      "face": true,
+      "motion": 0.04212143841911765,
+      "db": -17.936638691899944
+    },
+    {
+      "time": 3.75,
+      "face": true,
+      "motion": 0.0817456214256536,
+      "db": -23.47426602224808
+    },
+    {
+      "time": 4,
+      "face": true,
+      "motion": 0.15021446078431372,
+      "db": -19.772064435807582
+    },
+    {
+      "time": 4.25,
+      "face": true,
+      "motion": 0.07762842116013072,
+      "db": -18.4242599371601
+    },
+    {
+      "time": 4.5,
+      "face": true,
+      "motion": 0.07686855341094771,
+      "db": -20.45357258893271
+    },
+    {
+      "time": 4.75,
+      "face": true,
+      "motion": 0.03371821384803922,
+      "db": -19.317782113163464
+    },
+    {
+      "time": 5,
+      "face": true,
+      "motion": 0.07101205065359477,
+      "db": -21.54904988445097
+    },
+    {
+      "time": 5.25,
+      "face": true,
+      "motion": 0.023572495404411763,
+      "db": -18.960079890185995
+    },
+    {
+      "time": 5.5,
+      "face": true,
+      "motion": 0.0001953125,
+      "db": -22.701049123267374
+    },
+    {
+      "time": 5.75,
+      "face": true,
+      "motion": 0.00011425142973856209,
+      "db": -25.11867122448871
+    },
+    {
+      "time": 6,
+      "face": true,
+      "motion": 5.2019505718954247e-05,
+      "db": -25.578037768724382
+    },
+    {
+      "time": 6.25,
+      "face": true,
+      "motion": 4.021139705882353e-05,
+      "db": -15.190339108357511
+    },
+    {
+      "time": 6.5,
+      "face": true,
+      "motion": 4.3083639705882356e-05,
+      "db": -20.30210667412507
+    },
+    {
+      "time": 6.75,
+      "face": true,
+      "motion": 6.638071895424836e-05,
+      "db": -21.503268151041812
+    },
+    {
+      "time": 7,
+      "face": true,
+      "motion": 2.6807598039215686e-05,
+      "db": -17.79235441810574
+    },
+    {
+      "time": 7.25,
+      "face": true,
+      "motion": 4.2764501633986925e-05,
+      "db": -17.77946865561306
+    },
+    {
+      "time": 7.5,
+      "face": true,
+      "motion": 4.37219158496732e-05,
+      "db": -18.850710492377484
+    },
+    {
+      "time": 7.75,
+      "face": true,
+      "motion": 2.361621732026144e-05,
+      "db": -20.624329434365755
+    },
+    {
+      "time": 8,
+      "face": false,
+      "motion": 0.3028393714256536,
+      "db": -23.2095579477718
+    },
+    {
+      "time": 8.25,
+      "face": false,
+      "motion": 0.0562362770629085,
+      "db": -24.5384887147196
+    },
+    {
+      "time": 8.5,
+      "face": true,
+      "motion": 0.3463646982230392,
+      "db": -27.433435204894554
+    },
+    {
+      "time": 8.75,
+      "face": true,
+      "motion": 0.05736762152777778,
+      "db": -20.768449642708596
+    },
+    {
+      "time": 9,
+      "face": true,
+      "motion": 0.046714154411764706,
+      "db": -30.485247444097773
+    },
+    {
+      "time": 9.25,
+      "face": true,
+      "motion": 0.03186976613562092,
+      "db": -160
+    },
+    {
+      "time": 9.5,
+      "face": true,
+      "motion": 0.03947259242238562,
+      "db": -160
+    },
+    {
+      "time": 9.75,
+      "face": true,
+      "motion": 0.05582395067401961,
+      "db": -160
+    },
+    {
+      "time": 10,
+      "face": true,
+      "motion": 0.08736819597630718,
+      "db": -160
+    },
+    {
+      "time": 10.25,
+      "face": true,
+      "motion": 0.22900231055964052,
+      "db": -160
+    },
+    {
+      "time": 10.5,
+      "face": true,
+      "motion": 0.04505942350898693,
+      "db": -160
+    },
+    {
+      "time": 10.75,
+      "face": true,
+      "motion": 0.039954490910947715,
+      "db": -160
+    },
+    {
+      "time": 11,
+      "face": true,
+      "motion": 0.06280445772058824,
+      "db": -160
+    },
+    {
+      "time": 11.25,
+      "face": true,
+      "motion": 0.07339760774101307,
+      "db": -160
+    },
+    {
+      "time": 11.5,
+      "face": true,
+      "motion": 0.0967779820261438,
+      "db": -17.55383219147957
+    },
+    {
+      "time": 11.75,
+      "face": true,
+      "motion": 0.05597330729166667,
+      "db": -17.93955758058376
+    }
+  ],
+  "signals": [
+    {
+      "kind": "frozen_presenter",
+      "start": 5.25,
+      "end": 7.75,
+      "detail": "A face was detected and the sampled presenter region stayed nearly identical for 2.5s while audio energy continued. Inspect for an unintended freeze."
+    },
+    {
+      "kind": "audio_dropout",
+      "start": 9.25,
+      "end": 11.5,
+      "detail": "Audio drops to near digital silence for 2.3s between audible sections while a face remains visible. It may be an intentional pause; listen before accepting."
+    }
+  ],
+  "fps": 4,
+  "ms": 1890,
+  "limitations": [
+    "Checks sampled at 4 fps can miss short events. Face detection is not identity, emotion, authenticity or lip-sync verification.",
+    "Audio energy is not speech recognition. Intentional still shots and pauses can resemble defects; confirm in the player."
+  ],
+  "sourceSha256": "4d600fa1a2e54c2878e38ce1aed02c2271af16d2d9b0c21670b9b9086928fab0",
+  "source": "Browser MediaPipe face detector, decoded source frames, Web Audio PCM; controlled freeze 5-8 seconds, mute 9-11.5 seconds."
+}

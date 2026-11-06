@@ -13,12 +13,16 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "predev": "node scripts/prepare-ocr.mjs",
+    "prebuild": "node scripts/prepare-ocr.mjs",
+    "test:internal": "node --experimental-strip-types scripts/run-internal-test.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.112",
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.7.1",
+    "@mediapipe/tasks-vision": "^1.2.2",
     "@shadcn/react": "^0.3.0",
     "ai": "^7.0.163",
     "class-variance-authority": "0.7.1",
@@ -40,6 +44,7 @@
     "recharts": "^3.8.0",
     "sonner": "^2.0.8",
     "tailwind-merge": "3.6.0",
+    "tesseract.js": "^7.0.0",
     "vaul": "^1.1.2",
     "zod": "^3.25.76"
   },

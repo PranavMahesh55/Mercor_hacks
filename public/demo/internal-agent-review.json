@@ -1,0 +1,221 @@
+{
+  "id": "internal-agent-spelling-diagnostic",
+  "videoName": "internal-agent-visual-test.mp4",
+  "duration": 8,
+  "createdAt": "2026-11-06T20:15:48.034Z",
+  "model": "Internal agent + Tesseract diagnostic replay",
+  "brief": "The visible company title must be spelled MERCOR HACK DAY. Flag any different company spelling.",
+  "script": "",
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "The visible company title must be spelled MERCOR HACK DAY. Flag any different company spelling."
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-1",
+      "requirementId": "R1",
+      "evidenceIds": [
+        "V2"
+      ],
+      "category": "brand",
+      "severity": "high",
+      "title": "Incorrect company spelling",
+      "start": 2,
+      "end": 6,
+      "expected": "MERCOR HACK DAY",
+      "observed": "MERCURY HACK DAY",
+      "explanation": "The visible company title differs from the required spelling between 2 and 6 seconds.",
+      "suggestion": "Replace MERCURY HACK DAY with MERCOR HACK DAY.",
+      "evidenceType": "frame",
+      "evidenceQuote": "MERCURY HACK DAY",
+      "reviewStatus": "unreviewed",
+      "verification": {
+        "method": "blind_reread",
+        "status": "supported",
+        "detail": "Quoted observation appeared in source extraction and a separate reread. Both use the same model; this is consistency evidence, not independent proof."
+      }
+    }
+  ],
+  "transcript": [],
+  "checks": [
+    {
+      "requirementId": "R1",
+      "status": "suspected_failure",
+      "detail": "See timestamped evidence."
+    }
+  ],
+  "limitations": [
+    "Internal blind observer inspected source frames at integer seconds 0 through 7. Interval boundaries are sample boundaries, not frame-accurate measurements.",
+    "No audio playback was inspected. The source fixture has a silent audio track.",
+    "Visual sampling can miss brief events. Model transcript timestamps are approximate.",
+    "The extraction and blind reread use the same model and can share errors.",
+    "Appearance-only defects are withheld until stronger verification is available."
+  ],
+  "passes": [
+    {
+      "name": "Saved diagnostic: Read source without brief",
+      "status": "complete",
+      "ms": 0
+    },
+    {
+      "name": "Saved diagnostic: Check against campaign brief",
+      "status": "complete",
+      "ms": 0
+    },
+    {
+      "name": "Saved diagnostic: Reread flagged moments without verdict",
+      "status": "complete",
+      "ms": 0
+    }
+  ],
+  "audit": {
+    "candidates": 1,
+    "rejected": 0,
+    "rejectionReasons": [],
+    "verificationPerformed": true,
+    "evidence": [
+      {
+        "start": 0,
+        "end": 2,
+        "kind": "title",
+        "text": "MERCOR HACK DAY",
+        "detail": "Large white uppercase primary title, left-aligned.",
+        "clear": true,
+        "id": "V1",
+        "channel": "visual"
+      },
+      {
+        "start": 2,
+        "end": 6,
+        "kind": "title",
+        "text": "MERCURY HACK DAY",
+        "detail": "Large white uppercase primary title, left-aligned.",
+        "clear": true,
+        "id": "V2",
+        "channel": "visual"
+      },
+      {
+        "start": 6,
+        "end": 8,
+        "kind": "title",
+        "text": "MERCOR HACK DAY",
+        "detail": "Large white uppercase primary title, left-aligned.",
+        "clear": true,
+        "id": "V3",
+        "channel": "visual"
+      },
+      {
+        "start": 0,
+        "end": 8,
+        "kind": "caption",
+        "text": "SYNTHETIC TEST FIXTURE",
+        "detail": "Lime uppercase diagnostic label below the primary title.",
+        "clear": true,
+        "id": "V4",
+        "channel": "visual"
+      },
+      {
+        "start": 0,
+        "end": 8,
+        "kind": "caption",
+        "text": "Not an AI-generated advertisement",
+        "detail": "Muted gray diagnostic label below the lime label.",
+        "clear": true,
+        "id": "V5",
+        "channel": "visual"
+      }
+    ],
+    "recheckEvidence": [
+      {
+        "start": 0,
+        "end": 1,
+        "kind": "title",
+        "text": "MERCOR HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 00 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V1",
+        "channel": "visual"
+      },
+      {
+        "start": 1,
+        "end": 2,
+        "kind": "title",
+        "text": "MERCOR HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 01 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V2",
+        "channel": "visual"
+      },
+      {
+        "start": 2,
+        "end": 3,
+        "kind": "title",
+        "text": "MERCURY HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 02 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V3",
+        "channel": "visual"
+      },
+      {
+        "start": 3,
+        "end": 4,
+        "kind": "title",
+        "text": "MERCURY HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 03 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V4",
+        "channel": "visual"
+      },
+      {
+        "start": 4,
+        "end": 5,
+        "kind": "title",
+        "text": "MERCURY HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 04 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V5",
+        "channel": "visual"
+      },
+      {
+        "start": 5,
+        "end": 6,
+        "kind": "title",
+        "text": "MERCURY HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 05 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V6",
+        "channel": "visual"
+      },
+      {
+        "start": 6,
+        "end": 7,
+        "kind": "title",
+        "text": "MERCOR HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 06 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V7",
+        "channel": "visual"
+      },
+      {
+        "start": 7,
+        "end": 8,
+        "kind": "title",
+        "text": "MERCOR HACK DAY SYNTHETIC TEST FIXTURE Not an Al-generated advertisement Frame timestamp: 07 seconds",
+        "detail": "Independent Tesseract OCR of the actual source frame.",
+        "clear": true,
+        "id": "check-V8",
+        "channel": "visual"
+      }
+    ]
+  },
+  "analysisMs": 0,
+  "tokens": null,
+  "version": "takecheck-2.0",
+  "scriptMode": "meaning",
+  "cacheKey": "",
+  "referenceNames": [],
+  "sourceSha256": "16c226849d5934785e92c38dc9fde4d5f0ead0692a9afb88781249832c8683ef",
+  "provenance": "Saved internal-agent observations and judgment; independent local Tesseract reread. Not a Gemini request. Original agent inference latency was not benchmarked."
+}

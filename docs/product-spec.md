@@ -114,17 +114,13 @@ The correction brief uses only confirmed findings. It proposes changes; it does 
 
 Validate the file and read duration, dimensions, and media timing. Extract audio and frames while retaining their positions relative to player time. FFmpeg supports media extraction and timestamp handling; careless timestamp conversion can shift findings away from their evidence. [FFmpeg documentation](https://ffmpeg.org/ffmpeg.html)
 
-For the MVP, inspect one frame per second. A 45-second clip yields roughly 45 frames. Increase inspection near candidate issues where feasible. This is a proposed tradeoff, not complete inspection: short errors can fall between samples. Google’s video documentation similarly warns that low frame sampling can miss fast detail. [Video understanding](https://ai.google.dev/gemini-api/docs/video-understanding?hl=en)
+The shipped video observer samples at 2 fps, with a 4 fps blind reread around candidate issues. A separate browser face/motion/audio scan samples at 4 fps. This is incomplete inspection: short errors can fall between samples. Google’s video documentation similarly warns that low frame sampling can miss fast detail. [Video understanding](https://ai.google.dev/gemini-api/docs/video-understanding?hl=en)
 
 ### Step 2: Collect observations
 
-Run speech and visual work concurrently:
+Send the actual video, with its audio, to a blind observer that does not receive the brief. Collect timestamped speech, visible text and concrete visual cues: shot changes, occlusion, framing and gestures. A fresh judge receives this evidence record and the approved brief. The record is an audit trail, not model-training data.
 
-- Timestamped speech transcription.
-- Visible-text extraction.
-- Reference-based visual observations.
-
-Preserve raw observations before asking a model to judge them. Deepgram supports timestamped utterance and word output. PaddleOCR provides text-region detection and recognition components if independent OCR is added. [Deepgram](https://developers.deepgram.com/docs/utterances/), [PaddleOCR](https://www.paddleocr.ai/main/en/version3.x/module_usage/text_detection.html)
+The browser separately measures picture changes and PCM audio energy with a local MediaPipe face detector. It can flag a sustained still presenter image while audio continues, or a near-silent gap between audible sections. These playback signals do not establish a campaign violation. Tesseract independently checks visible-text quotes only where relevant. Deepgram and PaddleOCR are research alternatives, not shipped dependencies.
 
 ### Step 3: Apply narrow checks
 
@@ -205,25 +201,23 @@ Must ship:
 - Confirm/Dismiss and correction-brief export.
 - Honest coverage and processing-state labels.
 
-If time remains: separate OCR, denser inspection near findings, product-reference matching, then continuity checks.
+Shipped: independent OCR for eligible text, denser blind rereads, and narrow local playback continuity checks. Product identity/reference matching and general gesture-quality scoring remain unverified.
 
 Exclude video generation, automatic repair, authenticity scoring, predicted PR impact, predicted ad performance, campaign integrations, and universal compliance checking.
 
 Exclude lip-sync checking from the MVP. It requires audiovisual timing analysis, not sparse still-frame inspection; dedicated methods such as SyncNet address that separate task. [Oxford SyncNet](https://robots.ox.ac.uk/~vgg/software/lipsync/)
 
-## 11. Mercor demo
+## 11. Mercor campaign demo — revised
 
-Supply an approved demo brief containing the company spelling, provided company description, event hours, and a rule prohibiting unsupported employment guarantees. The brief is user-supplied test ground truth, not a claim that this tool independently researched the company.
+Use a normal campaign brief written from a marketer’s perspective: audience, message, hook, stock avatar, natural delivery, captions, and call to action. Generation and review use the exact same brief. Do not ask the generator to make mistakes.
 
-Generate a 40–50 second presenter video with deliberately seeded mistakes: an incorrect company name, incorrect event start time, and a guaranteed-job statement. Inspect the result and record what was actually spoken and displayed.
+Generate a 40–50 second Mercor concept video in HeyGen free. Inspect the actual output. Review it against the original brief, and accept a clean result if no supported violations are found. Creative suggestions must be distinguished from factual or brand errors; no claim of predicting virality or audience reaction.
 
-Important: this construction primarily tests message accuracy. If captions correctly reproduce the wrong speech, they are not subtitle-transcription errors; they may still violate the brand or factual requirements. Count the underlying incident once, noting both channels.
+The interface begins with a video upload and one campaign brief. Scripts and reference images are optional. API and model settings are outside the main campaign flow. Results contain clickable flagged moments, evidence, human decisions, and an export of confirmed changes.
 
-Include a genuine visual observation in the demo: wrong visible brand text or another inspected reference mismatch. If no such error appears, show a correct visual check rather than inventing a failure.
+Keep the clearly labeled synthetic spelling fixture only as a developer diagnostic. It does not demonstrate natural generation errors.
 
-Keep a correct control clip or segment. Prepare an evidence-backed saved review for a labeled replay. A fresh upload must invoke the real pipeline; no filename-based or preassigned findings.
-
-Cache identity includes video content, brief, references, model settings, and checker version. Editing the brief invalidates the cached result. Show measured live-analysis latency separately from replay loading time.
+Time generation and analysis separately. Saved review identity includes the video, brief, script, reference contents, model, matching mode, and checker version. Saved results are labeled Replay.
 
 ## 12. Evaluate the reviewer
 
@@ -275,3 +269,7 @@ If behind, drop continuity and generic product matching. Preserve visible-text c
 Human campaign expertise becomes explicit requirements. Different checks compare generated video against those requirements. Every suspected failure is tied to observable evidence, and a human resolves ambiguity.
 
 The technical contribution is that complete review loop—not a new foundational vision model or an unsupported promise that the system can judge every aspect of video quality.
+
+## Current verification status
+
+The implementation does not train or fine-tune a model. See README for the shipped pipeline and measured results. An actual 12-second talking-head clean control produced zero playback flags; a controlled freeze/mute copy produced two corresponding flags in the browser. Both local runs took about 2.1 seconds end to end with the runtime loaded. This is a two-clip diagnostic, not an accuracy benchmark. 27 automated tests passed. Live Gemini video review could not be validated because generation quota was blocked. The custom normal-brief Mercor video has not yet been generated.
