@@ -1,101 +1,132 @@
-import { createGoogle } from "@ai-sdk/google";
-import { generateText, APICallError } from "ai";
-
+import {
+  classifyFailure,
+  describeFailure,
+  probeCandidates,
+  usableModels,
+  type CatalogModel,
+  type ProbeFailure,
+} from "@/lib/gemini-connection";
+const BASE = "https://generativelanguage.googleapis.com/v1beta";
 export async function POST(request: Request) {
-  const key = request.headers.get("x-review-key");
+  const key = request.headers.get("x-review-key")?.trim();
+  const headers = { "Cache-Control": "no-store" };
   if (!key || key.length < 15)
     return Response.json(
       { error: "Enter a valid Gemini API key." },
-      { status: 400 },
+      { status: 400, headers },
     );
+  const deadline = AbortSignal.any([
+    request.signal,
+    AbortSignal.timeout(55000),
+  ]);
   try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000",
-      {
-        headers: { "x-goog-api-key": key },
-        signal: AbortSignal.timeout(15000),
-      },
-    );
-    if (!response.ok)
-      return Response.json(
-        {
-          error:
-            response.status === 429
-              ? "Google is rate-limiting model discovery. Try again shortly."
-              : "Google could not validate this key. Check its API permissions.",
-        },
-        { status: response.status === 429 ? 429 : 401 },
+    const catalog = await fetch(`${BASE}/models?pageSize=1000`, {
+      headers: { "x-goog-api-key": key },
+      signal: deadline,
+    });
+    const catalogBody = await catalog.json();
+    if (!catalog.ok) {
+      const failure = classifyFailure(
+        "Model discovery",
+        catalog.status,
+        catalogBody,
       );
-    const data = (await response.json()) as {
-      models?: {
-        name: string;
-        displayName: string;
-        supportedGenerationMethods?: string[];
-      }[];
-    };
-    const models = (data.models ?? [])
-      .filter(
-        (m) =>
-          m.supportedGenerationMethods?.includes("generateContent") &&
-          m.name.includes("gemini") &&
-          !/image|tts|robotics|embedding|live|computer-use/.test(m.name),
-      )
-      .map((m) => ({ id: m.name.replace("models/", ""), name: m.displayName }));
-    // Discover first, then prove generation quota with a tiny real request.
-    // These candidate IDs are used only if the account's live catalog lists them.
-    const choices = [
-      "gemini-2.5-flash",
-      "gemini-2.5-flash-lite",
-      "gemini-3.5-flash-lite",
-    ]
-      .map((id) => models.find((m) => m.id === id))
-      .filter((m): m is { id: string; name: string } => !!m);
-    if (!choices.length) {
-      const stable = models
-        .filter((m) => /^gemini-[0-9.]+-flash$/.test(m.id))
-        .sort((a, b) => b.id.localeCompare(a.id, undefined, { numeric: true }));
-      choices.push(...stable.slice(0, 2));
+      return Response.json(
+        { error: describeFailure(failure), diagnostics: [failure] },
+        { status: catalog.status === 429 ? 429 : 401, headers },
+      );
     }
+    const models = usableModels(
+      (catalogBody as { models?: CatalogModel[] }).models ?? [],
+    );
+    const choices = probeCandidates(models);
     if (!choices.length)
       return Response.json(
-        { error: "No supported Flash model was found for this key." },
-        { status: 400 },
+        { error: "This key did not list a supported Gemini generation model." },
+        { status: 400, headers },
       );
-    const google = createGoogle({ apiKey: key });
-    let lastStatus = 502;
-    for (const candidate of choices.slice(0, 2)) {
+    const diagnostics: ProbeFailure[] = [];
+    for (const choice of choices) {
+      if (deadline.aborted) break;
       try {
-        await generateText({
-          model: google(candidate.id),
-          prompt: "Reply with the word OK.",
-          maxOutputTokens: 16,
-          maxRetries: 0,
-          abortSignal: AbortSignal.timeout(20000),
-        });
-        return Response.json(
-          { models, preferredModel: candidate.id, quotaVerified: true },
-          { headers: { "Cache-Control": "no-store" } },
+        // Raw REST separates provider quota/permission failures from SDK parsing.
+        // A 16-token budget can be exhausted before a reasoning model replies.
+        const response = await fetch(
+          `${BASE}/models/${choice.id}:generateContent`,
+          {
+            method: "POST",
+            headers: {
+              "x-goog-api-key": key,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                { role: "user", parts: [{ text: "Reply with the word OK." }] },
+              ],
+              generationConfig: { maxOutputTokens: 512 },
+            }),
+            signal: AbortSignal.any([deadline, AbortSignal.timeout(12000)]),
+          },
         );
-      } catch (error) {
-        lastStatus = APICallError.isInstance(error)
-          ? (error.statusCode ?? 502)
-          : 502;
-        if (![429, 503, 404].includes(lastStatus)) break;
+        const body = (await response.json()) as {
+          candidates?: {
+            content?: { parts?: { text?: string; thought?: boolean }[] };
+          }[];
+        };
+        if (!response.ok) {
+          const failure = classifyFailure(choice.id, response.status, body);
+          diagnostics.push(failure);
+          if (failure.reason === "permission") break;
+          continue;
+        }
+        const text = body.candidates
+          ?.flatMap((c) => c.content?.parts ?? [])
+          .filter((p) => !p.thought)
+          .map((p) => p.text ?? "")
+          .join("")
+          .trim();
+        if (!text) {
+          diagnostics.push({
+            model: choice.id,
+            status: 200,
+            reason: "no_output",
+          });
+          continue;
+        }
+        return Response.json(
+          {
+            models,
+            preferredModel: choice.id,
+            quotaVerified: true,
+            diagnostics,
+          },
+          { headers },
+        );
+      } catch {
+        if (request.signal.aborted)
+          throw new DOMException("Cancelled", "AbortError");
+        diagnostics.push({
+          model: choice.id,
+          status: 504,
+          reason: "unavailable",
+        });
       }
     }
+    const quota = diagnostics.some((d) => d.status === 429);
     return Response.json(
       {
-        error:
-          lastStatus === 429
-            ? "Your key can list models, but Google rejected test generation on the available Flash models because of quota. Check the project’s API quota or connect another key. A ChatGPT/Gemini website subscription does not provide API quota."
-            : "The key could list models but could not complete a test generation. Check model permissions and retry.",
+        error: `Gemini could list models, but generation failed. ${diagnostics.map(describeFailure).join(". ")}. ${quota ? "Check this API project's active limits in Google AI Studio. Another key in the same project does not reset project quota." : "The generation errors above identify the remaining connection problem."}`,
+        diagnostics,
       },
-      { status: lastStatus === 429 ? 429 : 502 },
+      { status: quota ? 429 : 502, headers },
     );
   } catch {
     return Response.json(
-      { error: "Could not reach Gemini. Check your connection and try again." },
-      { status: 502 },
+      {
+        error:
+          "Gemini model discovery could not finish. Check the network and retry.",
+      },
+      { status: 502, headers },
     );
   }
 }
