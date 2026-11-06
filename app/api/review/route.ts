@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const started = performance.now();
   if (Number(request.headers.get("content-length")) > 20 * 1024 * 1024)
     return Response.json(
-      { error: "Upload exceeds the demo limit. Use an MP4 under 14 MB." },
+      { error: "Upload exceeds the demo limit. Use an MP4 under 64 MB." },
       { status: 413 },
     );
   try {
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           error:
-            "Choose a supported video under 14 MB (MP4, WebM, or MOV). MP4 is recommended.",
+            "Choose a supported video under 64 MB (MP4, WebM, or MOV). MP4 is recommended.",
         },
         { status: 400 },
       );
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
       };
       if (info.state !== "ACTIVE" || Number(info.sizeBytes) > MAX_VIDEO_BYTES)
         return Response.json(
-          { error: "The uploaded video is not ready or exceeds 14 MB." },
+          { error: "The uploaded video is not ready or exceeds 64 MB." },
           { status: 400 },
         );
     }

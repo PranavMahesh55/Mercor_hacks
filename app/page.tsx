@@ -299,7 +299,7 @@ export default function Home() {
     try {
       if (f.size > MAX_VIDEO_BYTES)
         throw new Error(
-          "Use a video under 14 MB. Export a 720p MP4 for a short demo.",
+          "Use a video under 64 MB. Export a 720p MP4 for a short demo.",
         );
       if (!["video/mp4", "video/webm", "video/quicktime"].includes(f.type))
         throw new Error("Choose MP4, WebM, or MOV. MP4 works best.");
@@ -645,7 +645,10 @@ export default function Home() {
       }
       setPhase("Gemini is checking speech, delivery and the campaign brief");
       const data = new FormData();
-      if (project.file.size > 3 * 1024 * 1024) {
+      if (
+        project.file.size + refs.reduce((sum, f) => sum + f.size, 0) >
+        3 * 1024 * 1024
+      ) {
         const { uploadVideo } = await import("@/lib/upload-video");
         const uploaded = await uploadVideo(
           project.file,
@@ -1020,7 +1023,7 @@ export default function Home() {
                     <small>
                       Drop a file here, or choose one
                       <br />
-                      MP4, MOV, WebM · Up to 60s · 14 MB · Reviews automatically
+                      MP4, MOV, WebM · Up to 60s · 64 MB · Reviews automatically
                     </small>
                     <div className="platform-tags">
                       <span>Instagram Reels</span>

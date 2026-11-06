@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CHECKER_VERSION = "takecheck-2.2";
-export const MAX_VIDEO_BYTES = 14 * 1024 * 1024;
+export const MAX_VIDEO_BYTES = 64 * 1024 * 1024;
 export const categorySchema = z.enum([
   "message",
   "captions",

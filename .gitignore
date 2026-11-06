@@ -49,3 +49,4 @@ yarn-error.log*
 /public/ocr/worker.min.js
 
 /public/vision/wasm/
+.vercel

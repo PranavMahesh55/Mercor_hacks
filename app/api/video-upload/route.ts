@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       body.size > MAX_VIDEO_BYTES ||
       !["video/mp4", "video/webm", "video/quicktime"].includes(body.type ?? "")
     )
-      return out({ error: "Use a supported video under 14 MB." }, 400);
+      return out({ error: "Use a supported video under 64 MB." }, 400);
     const r = await fetch(`${BASE}/upload/v1beta/files`, {
       method: "POST",
       headers: {
