@@ -211,6 +211,7 @@ export default function Home() {
   const fileInput = useRef<HTMLInputElement>(null);
   const cancel = useRef<AbortController | null>(null);
   const uploadToken = useRef(0);
+  const pendingAutoReview = useRef<string | null>(null);
   const current = review?.findings.find((f) => f.id === selected) ?? null;
   const changed =
     !!review &&
@@ -270,6 +271,18 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [notice]);
 
+  useEffect(() => {
+    if (
+      project &&
+      pendingAutoReview.current === project.id &&
+      !busy &&
+      !uploading
+    ) {
+      pendingAutoReview.current = null;
+      void run(true);
+    }
+  }, [project?.id, busy, uploading, connected, model]);
+
   async function persist(next: SavedProject) {
     setProject(next);
     try {
@@ -279,7 +292,7 @@ export default function Home() {
       setError((e as Error).message);
     }
   }
-  async function pick(f: File) {
+  async function pick(f: File, auto = true) {
     const token = ++uploadToken.current;
     setError("");
     setUploading(true);
@@ -314,9 +327,14 @@ export default function Home() {
       setRefsChanged(false);
       setFile(f);
       setTab("brief");
+      if (auto) pendingAutoReview.current = next.id;
       await persist(next);
       setModal(null);
-      setNotice("Video ready. Check the approved brief, then run review.");
+      setNotice(
+        auto
+          ? "Video ready. Starting your review automatically."
+          : "Diagnostic ready. Choose when to run the review.",
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -338,6 +356,7 @@ export default function Home() {
             : "talking-head-clean-control.mp4",
           { type: "video/mp4" },
         ),
+        false,
       );
       setBrief(
         "A casual direct-to-camera product introduction for a short social ad. Review spoken delivery and visual continuity. The source is a public HeyGen avatar example, not a Mercor campaign or our generation.",
@@ -358,6 +377,7 @@ export default function Home() {
       const blob = await response.blob();
       await pick(
         new File([blob], "visual-check-fixture.mp4", { type: "video/mp4" }),
+        false,
       );
     } catch (e) {
       setError((e as Error).message);
@@ -494,6 +514,11 @@ export default function Home() {
           )[0] ?? list[0];
       setModel(d.preferredModel ?? preferred.id);
       setConnected(true);
+      if (
+        project &&
+        (!review || review.model === "Local picture and audio checks")
+      )
+        pendingAutoReview.current = project.id;
       setNotice("Gemini connected for this tab.");
     } catch (e) {
       setConnected(false);
@@ -620,10 +645,26 @@ export default function Home() {
       }
       setPhase("Gemini is checking speech, delivery and the campaign brief");
       const data = new FormData();
-      data.append(
-        "video",
-        new File([project.file], project.name, { type: project.type }),
-      );
+      if (project.file.size > 3 * 1024 * 1024) {
+        const { uploadVideo } = await import("@/lib/upload-video");
+        const uploaded = await uploadVideo(
+          project.file,
+          project.name,
+          project.type,
+          key,
+          setPhase,
+          controller.signal,
+        );
+        data.append("videoUri", uploaded.uri);
+        data.append("remoteName", uploaded.name);
+        data.append("videoName", project.name);
+        data.append("mediaType", project.type);
+      } else {
+        data.append(
+          "video",
+          new File([project.file], project.name, { type: project.type }),
+        );
+      }
       data.append("brief", brief);
       data.append("script", script);
       data.append("model", model);
@@ -979,7 +1020,7 @@ export default function Home() {
                     <small>
                       Drop a file here, or choose one
                       <br />
-                      MP4, MOV, WebM · Up to 60s · 14 MB
+                      MP4, MOV, WebM · Up to 60s · 14 MB · Reviews automatically
                     </small>
                     <div className="platform-tags">
                       <span>Instagram Reels</span>

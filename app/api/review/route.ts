@@ -1,3 +1,5 @@
+import { validFileUri, validFileName } from "@/lib/video-upload";
+export const maxDuration = 180;
 import { generateText, Output, APICallError } from "ai";
 import { createGoogle } from "@ai-sdk/google";
 import {
@@ -55,16 +57,31 @@ export async function POST(request: Request) {
       );
     const form = await request.formData();
     const file = form.get("video");
+    const videoUri = String(form.get("videoUri") ?? "");
+    const remoteName = String(form.get("remoteName") ?? "");
+    const videoName =
+      file instanceof File
+        ? file.name
+        : String(form.get("videoName") ?? "ugc-video.mp4").slice(0, 200);
+    const mediaType =
+      file instanceof File
+        ? file.type
+        : String(form.get("mediaType") ?? "video/mp4");
+    const remote =
+      validFileUri(videoUri) &&
+      validFileName(remoteName) &&
+      videoUri.endsWith("/" + remoteName);
     const brief = normalizeReviewText(String(form.get("brief") ?? ""));
     const script = normalizeReviewText(String(form.get("script") ?? ""));
     const model = String(form.get("model") ?? "");
     const duration = Number(form.get("duration"));
     const mode = String(form.get("mode") ?? "meaning");
     if (
-      !(file instanceof File) ||
-      !file.size ||
-      file.size > MAX_VIDEO_BYTES ||
-      !["video/mp4", "video/webm", "video/quicktime"].includes(file.type)
+      (!remote &&
+        (!(file instanceof File) ||
+          !file.size ||
+          file.size > MAX_VIDEO_BYTES)) ||
+      !["video/mp4", "video/webm", "video/quicktime"].includes(mediaType)
     )
       return Response.json(
         {
@@ -108,7 +125,32 @@ export async function POST(request: Request) {
         },
         { status: 400 },
       );
-    const data = new Uint8Array(await file.arrayBuffer());
+    if (remote) {
+      const check = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/${remoteName}`,
+        {
+          headers: { "x-goog-api-key": key },
+          signal: AbortSignal.timeout(15000),
+        },
+      );
+      if (!check.ok)
+        return Response.json(
+          { error: "The uploaded video is not accessible to this key." },
+          { status: 400 },
+        );
+      const info = (await check.json()) as {
+        sizeBytes?: string;
+        state?: string;
+      };
+      if (info.state !== "ACTIVE" || Number(info.sizeBytes) > MAX_VIDEO_BYTES)
+        return Response.json(
+          { error: "The uploaded video is not ready or exceeds 14 MB." },
+          { status: 400 },
+        );
+    }
+    const data = remote
+      ? new URL(videoUri)
+      : new Uint8Array(await (file as File).arrayBuffer());
     const images = await Promise.all(
       references.map(async (f) => ({
         type: "image" as const,
@@ -141,7 +183,7 @@ export async function POST(request: Request) {
                   {
                     type: "file",
                     data,
-                    mediaType: file.type,
+                    mediaType,
                     providerOptions: {
                       google: { videoMetadata: { fps: focus ? 4 : 2 } },
                     },
@@ -194,7 +236,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         id: crypto.randomUUID(),
-        videoName: file.name,
+        videoName,
         duration,
         createdAt: new Date().toISOString(),
         model,
